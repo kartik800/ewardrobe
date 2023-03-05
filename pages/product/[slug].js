@@ -2,6 +2,8 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import mongoose from "mongoose";
 import Product from "../../models/Product";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Post = ({ buyNow, addToCart, product, variants }) => {
   const router = useRouter();
@@ -34,6 +36,7 @@ const Post = ({ buyNow, addToCart, product, variants }) => {
     <>
       {" "}
       <section className="text-gray-600 body-font overflow-hidden">
+        {/* <ToastContainer /> */}
         <div className="container px-5 py-16 mx-auto">
           <div className="lg:w-4/5 mx-auto flex flex-wrap">
             <img
@@ -264,7 +267,7 @@ const Post = ({ buyNow, addToCart, product, variants }) => {
                 </span>
                 <button
                   onClick={() => {
-                    buyNow(slug, 1, 499, product.title, size, color);
+                    buyNow(slug, 1, product.price, product.title, size, color);
                   }}
                   className="flex ml-8 text-white bg-pink-500 border-0 py-2 px-2 md:px-6 focus:outline-none hover:bg-pink-600 rounded"
                 >
@@ -272,7 +275,14 @@ const Post = ({ buyNow, addToCart, product, variants }) => {
                 </button>
                 <button
                   onClick={() => {
-                    addToCart(slug, 1, 499, product.title, size, color);
+                    addToCart(
+                      slug,
+                      1,
+                      product.price,
+                      product.title,
+                      size,
+                      color
+                    );
                   }}
                   className="flex ml-4 text-white bg-pink-500 border-0 py-2 px-2 md:px-6 focus:outline-none hover:bg-pink-600 rounded"
                 >
@@ -330,7 +340,10 @@ export async function getServerSideProps(context) {
     await mongoose.connect(process.env.MONGO_URI);
   }
   let product = await Product.findOne({ slug: context.query.slug });
-  let variants = await Product.find({ title: product.title });
+  let variants = await Product.find({
+    title: product.title,
+    category: product.category,
+  });
   let colorSizeSlug = {}; // {red {xl:{slug:'wear-the-code-xl'}}}
   for (let item of variants) {
     if (Object.keys(colorSizeSlug).includes(item.color)) {
